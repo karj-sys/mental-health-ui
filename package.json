@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-   "homepage": "https://karj-sys.github.io/mental-health-ui/",
+  "homepage": "https://karj-sys.github.io/mental-health-ui/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -28,5 +28,4 @@
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
   }
-  
 }
