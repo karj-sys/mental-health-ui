@@ -1,7 +1,10 @@
-import express from 'express';
-import cors from 'cors';
-import mysql from 'mysql2';
-import 'dotenv/config'; // Loads your DB_HOST, DB_USER, etc. from .env
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import mysql from "mysql2";
+import moodRoutes from "./routes/moods.js";
+
+dotenv.config();
 
 const app = express();
 
@@ -9,58 +12,32 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 1. Database Connection using Environment Variables
+// 1. Database Connection (Required for your moodRoutes to function)
 const db = mysql.createConnection({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'mental_health_db'
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 3306,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
 });
 
 db.connect(err => {
-    if (err) {
-        console.error('❌ Database connection failed:', err.message);
-    } else {
-        console.log('✅ Connected to MySQL Database using .env settings!');
-    }
+    if (err) console.error('❌ Database connection failed:', err.message);
+    else console.log('✅ Connected to MySQL Database!');
 });
 
-// 2. Home Route (Fixes the "Cannot GET /" error in browser)
+// 2. Home Route (Prevents "Cannot GET /" on Render)
 app.get('/', (req, res) => {
-    res.send(`
-        <div style="font-family: sans-serif; text-align: center; margin-top: 50px;">
-            <h1>🚀 AI Advisor Backend is Running!</h1>
-            <p>The API is listening for moods at <strong>/api/mood</strong></p>
-            <p style="color: green;">✔ Database Connection: Active</p>
-        </div>
-    `);
+    res.send('<h1>🚀 AI Advisor API is Live</h1><p>Endpoint: /api/moods</p>');
 });
 
-// 3. Mood Submission Route (Matches your Vue MoodForm.vue)
-app.post('/api/mood', (req, res) => {
-    const { mood_text } = req.body; 
-    
-    // Logic for AI Response (For Lab 6 purposes)
-    const ai_response = `AI Advisor: I see you are feeling ${mood_text}. Acknowledging your emotions is a great step toward mental clarity.`;
-
-    // SQL Query to insert into your 'moods' table
-    const sql = "INSERT INTO moods (mood_text, ai_response) VALUES (?, ?)";
-    
-    db.query(sql, [mood_text, ai_response], (err, result) => {
-        if (err) {
-            console.error("❌ SQL Error:", err);
-            return res.status(500).json({ error: "Database insertion failed" });
-        }
-        
-        console.log(`💾 Saved to DB: ${mood_text}`);
-        
-        // Return the response as 'message' to match your Vue component
-        res.json({ message: ai_response });
-    });
-});
+// 3. Use your imported routes
+// Note: This matches your frontend request to /api/moods
+app.use("/api/moods", moodRoutes);
 
 // 4. Start Server
+// Render requires '0.0.0.0' and process.env.PORT to bind correctly
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT}`);
 });
