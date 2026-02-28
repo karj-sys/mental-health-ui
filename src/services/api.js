@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  // Ensure the port matches and it ends with /api/moods
-  baseURL: 'http://localhost:3000/api/moods' 
+  // Pointing to your Node server's API prefix
+  baseURL: 'http://localhost:3000/api' 
 });
 
 export default api;

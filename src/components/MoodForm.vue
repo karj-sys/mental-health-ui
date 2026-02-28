@@ -23,36 +23,24 @@ export default {
   },
   methods: {
     async submitMood() {
-      // 1. Client-side validation
       if (!this.name || !this.mood) return alert("Please fill in both fields");
       
       this.loading = true;
-      this.aiMessage = ""; // Clear previous messages
+      this.aiMessage = ""; 
       
       try {
-        // 2. The API Call
-        // NOTE: We use '/' because the 'api/moods' part is already in your api.js baseURL
-        const res = await api.post('/', {
-          full_name: this.name,
-          mood_text: this.mood
+        // We call '/mood', which combines with the baseURL to become:
+        // http://localhost:3000/api/mood
+        const res = await api.post('/mood', {
+          mood_text: this.mood // Matches the variable in server.js
         });
 
-        // 3. Match the response key from your backend (ai_message or ai_response)
-        this.aiMessage = res.data.ai_message || res.data.ai_response;
+        // The backend sends the response inside 'message'
+        this.aiMessage = res.data.message;
 
       } catch (err) {
         console.error("Connection Error:", err);
-        
-        // Detailed error logging to help you debug
-        if (err.response) {
-          // Server responded with a status code outside the 2xx range
-          this.aiMessage = `Server Error: ${err.response.status} - ${err.response.data.message || 'Check backend logs'}`;
-        } else if (err.request) {
-          // Request was made but no response was received
-          this.aiMessage = "Error: Could not reach the AI Advisor. Is the backend running on port 3000?";
-        } else {
-          this.aiMessage = "An unexpected error occurred.";
-        }
+        this.aiMessage = "AI Advisor: Server Error. Is 'node server.js' running?";
       } finally {
         this.loading = false;
       }
